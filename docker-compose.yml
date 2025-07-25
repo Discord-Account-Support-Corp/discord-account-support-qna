@@ -1,26 +1,6 @@
 version: '3.8'
 
 services:
-  answer-backend:
-    image: apache/answer-backend:latest
-    ports:
-      - "9090:9090"
-    environment:
-      - ANSWER_DB_HOST=db
-      - ANSWER_DB_PORT=5432
-      - ANSWER_DB_NAME=answerdb
-      - ANSWER_DB_USER=answeruser
-      - ANSWER_DB_PASSWORD=answerpass
-    depends_on:
-      - db
-
-  answer-frontend:
-    image: apache/answer-frontend:latest
-    ports:
-      - "9080:80"
-    depends_on:
-      - answer-backend
-
   db:
     image: postgres:13
     environment:
@@ -28,7 +8,27 @@ services:
       POSTGRES_USER: answeruser
       POSTGRES_PASSWORD: answerpass
     volumes:
-      - answer-db-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    image: apache/answer-backend:latest
+    depends_on:
+      - db
+    ports:
+      - "9090:9090"
+    environment:
+      ANSWER_DB_HOST: db
+      ANSWER_DB_PORT: 5432
+      ANSWER_DB_NAME: answerdb
+      ANSWER_DB_USER: answeruser
+      ANSWER_DB_PASSWORD: answerpass
+
+  frontend:
+    image: apache/answer-frontend:latest
+    depends_on:
+      - backend
+    ports:
+      - "9080:80"
 
 volumes:
-  answer-db-data:
+  pgdata:
